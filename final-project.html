@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sandbox Drawing App</title>
+  <style>
+    #drawing-canvas {
+      border: 1px solid #000;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="drawing-canvas" width="800" height="600"></canvas>
+  <script>
+    const canvas = document.getElementById('drawing-canvas');
+    const context = canvas.getContext('2d');
+
+    let drawing = false;
+
+    canvas.addEventListener('mousedown', () => {
+      drawing = true;
+      context.beginPath();
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      drawing = false;
+      context.closePath();
+    });
+
+    canvas.addEventListener('mousemove', draw);
+
+    function draw(e) {
+      if (!drawing) return;
+
+      context.lineWidth = 2;
+      context.lineCap = 'round';
+      context.strokeStyle = 'black';
+
+      context.lineTo(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
+      context.stroke();
+    }
+
+    document.getElementById('clear-button').addEventListener('click', () => {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    });
+  </script>
+  <button id="clear-button">Clear</button>
+</body>
+</html>
