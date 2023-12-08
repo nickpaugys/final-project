@@ -1,20 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Sandbox Drawing App</title>
-  <style>
-    #drawing-canvas {
-      border: 1px solid #000;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>Accusketch</title>
+  <link rel="stylesheet" href="final-project.css">
+  <script>
+    alert("Accusketch is a revolutionary drawing application. Prepare to be amazed by the functionality of the application. Enjoy :)")
+  </script>
 </head>
 <body>
-  <canvas id="drawing-canvas" width="800" height="600"></canvas>
+  <h1>Accusketch</h1>
+  <h2>Simply pick a color and get to drawing!</h2>
+  <h2>If you'd like to clear the canvas, press the "Clear" button.</h2>
+  <h2>If you want to go back a stroke, press the "Back" button.</h2>
+  
+  <div id="drawing-container">
+    <div id="user-customs">
+        <label for="canvas-color-picker">Drawing Color</label>
+        <input type="color" id="canvas-color-picker">
+      
+        <label for="canvas-bg-color-picker">Canvas Color</label>
+        <input type="color" id="canvas-bg-color-picker">
+        
+        <label for="line-thickness">Line Thickness</label>
+        <input type="range" id="line-thickness" min="1" max="20" value="10">
+    </div>
+    
+    <canvas id="drawing-canvas" width="1400" height="750"></canvas>
+    <button id="clear-button">Clear</button>
+    <button id="back-button">Back</button>
+  </div>
+
   <script>
     const canvas = document.getElementById('drawing-canvas');
     const context = canvas.getContext('2d');
+    const colorPicker = document.getElementById('canvas-color-picker');
+    const canvasColorPicker = document.getElementById('canvas-bg-color-picker');
+    const clearButton = document.getElementById('clear-button');
+    const backButton = document.getElementById('back-button');
+    const lineThickness = document.getElementById('line-thickness');
 
     let drawing = false;
+    let strokes = [];
+    let currentColor = colorPicker.value;
 
     canvas.addEventListener('mousedown', () => {
       drawing = true;
@@ -24,25 +52,50 @@
     canvas.addEventListener('mouseup', () => {
       drawing = false;
       context.closePath();
+      strokes.push(context.getImageData(0, 0, canvas.width, canvas.height));
     });
 
     canvas.addEventListener('mousemove', draw);
 
-    function draw(e) {
-      if (!drawing) return;
-
-      context.lineWidth = 2;
-      context.lineCap = 'round';
-      context.strokeStyle = 'black';
-
-      context.lineTo(e.clientX - canvas.getBoundingClientRect().left, e.clientY - canvas.getBoundingClientRect().top);
-      context.stroke();
-    }
-
-    document.getElementById('clear-button').addEventListener('click', () => {
-      context.clearRect(0, 0, canvas.width, canvas.height);
+    colorPicker.addEventListener('input', () => {
+      currentColor = colorPicker.value;
     });
+
+    canvasColorPicker.addEventListener('input', () => {
+        canvas.style.backgroundColor = canvasColorPicker.value;
+    });
+
+    clearButton.addEventListener('click', () => {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        strokes = [];
+    });
+
+    backButton.addEventListener('click', () => {
+        if (strokes.length > 0) {
+            strokes.pop();
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.putImageData(strokes[strokes.length - 1], 0, 0);
+        }
+    });
+
+    lineThickness.addEventListener('input', () => {
+      context.lineWidth = lineThickness.value;
+    });
+
+function draw(e) {
+  if (!drawing) return;
+
+  context.lineCap = 'round';
+  context.strokeStyle = currentColor; // Set the stroke color to the current drawing color
+
+  const x = e.clientX - canvas.getBoundingClientRect().left;
+  const y = e.clientY - canvas.getBoundingClientRect().top;
+
+  context.lineTo(x, y);
+  context.stroke();
+  context.beginPath();
+  context.moveTo(x, y);
+}
   </script>
-  <button id="clear-button">Clear</button>
 </body>
 </html>
